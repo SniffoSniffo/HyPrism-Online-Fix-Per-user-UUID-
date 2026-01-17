@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
+import { GetMusicEnabled, SetMusicEnabled } from '../../wailsjs/go/app/App';
 
 // Import all music tracks
 import menu01 from '../assets/menu_01.ogg';
@@ -24,11 +25,9 @@ interface MusicPlayerProps {
 }
 
 export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '', forceMuted = false }) => {
-  // Load saved mute preference from localStorage
-  const [isMuted, setIsMuted] = useState(() => {
-    const saved = localStorage.getItem('hyprism-music-muted');
-    return saved === 'true';
-  });
+  // Start with music disabled until we load the saved preference
+  const [isMuted, setIsMuted] = useState(true);
+  const [configLoaded, setConfigLoaded] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(0);
   const [isFading, setIsFading] = useState(false);
@@ -36,10 +35,26 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '', forceM
   const fadeIntervalRef = useRef<number | null>(null);
   const targetVolumeRef = useRef(0.3);
 
-  // Save mute preference when it changes
+  // Load saved music preference from backend config on mount
   useEffect(() => {
-    localStorage.setItem('hyprism-music-muted', String(isMuted));
-  }, [isMuted]);
+    GetMusicEnabled().then((enabled) => {
+      // If music is enabled in config, we should NOT be muted
+      setIsMuted(!enabled);
+      setConfigLoaded(true);
+    }).catch(() => {
+      // Default to music enabled if config fails to load
+      setIsMuted(false);
+      setConfigLoaded(true);
+    });
+  }, []);
+
+  // Save mute preference to backend when it changes (after initial load)
+  useEffect(() => {
+    if (configLoaded) {
+      // Save to backend: musicEnabled = !isMuted
+      SetMusicEnabled(!isMuted).catch(console.error);
+    }
+  }, [isMuted, configLoaded]);
 
   // Handle forceMuted prop with smooth fade
   useEffect(() => {
@@ -117,35 +132,39 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '', forceM
   }, []);
 
   useEffect(() => {
-    if (!isLoaded || !audioRef.current) return;
+    // Wait for both track to be loaded AND config to be loaded
+    if (!isLoaded || !configLoaded || !audioRef.current) return;
 
     const audio = audioRef.current;
     audio.volume = 0.3; // 30% volume
+    audio.muted = isMuted; // Apply initial mute state from config
     
-    // Auto-play when loaded
-    const playAudio = async () => {
-      try {
-        await audio.play();
-      } catch (err) {
-        // Auto-play was prevented, user needs to interact first
-        console.log('Auto-play blocked, waiting for user interaction');
-        
-        const handleUserInteraction = async () => {
-          try {
-            await audio.play();
-            document.removeEventListener('click', handleUserInteraction);
-            document.removeEventListener('keydown', handleUserInteraction);
-          } catch (e) {
-            // Still blocked
-          }
-        };
-        
-        document.addEventListener('click', handleUserInteraction);
-        document.addEventListener('keydown', handleUserInteraction);
-      }
-    };
+    // Only auto-play if music is enabled (not muted)
+    if (!isMuted) {
+      const playAudio = async () => {
+        try {
+          await audio.play();
+        } catch (err) {
+          // Auto-play was prevented, user needs to interact first
+          console.log('Auto-play blocked, waiting for user interaction');
+          
+          const handleUserInteraction = async () => {
+            try {
+              await audio.play();
+              document.removeEventListener('click', handleUserInteraction);
+              document.removeEventListener('keydown', handleUserInteraction);
+            } catch (e) {
+              // Still blocked
+            }
+          };
+          
+          document.addEventListener('click', handleUserInteraction);
+          document.addEventListener('keydown', handleUserInteraction);
+        }
+      };
 
-    playAudio();
+      playAudio();
+    }
 
     // Handle track ending - play next random track
     const handleEnded = () => {
@@ -158,7 +177,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '', forceM
     return () => {
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [isLoaded, currentTrack]);
+  }, [isLoaded, configLoaded, currentTrack]);
 
   const toggleMute = () => {
     if (audioRef.current) {
