@@ -79,6 +79,7 @@ func InstallButler(ctx context.Context, progressCallback func(stage string, prog
 
 	// Verify butler works
 	cmd := exec.Command(butlerPath, "version")
+	util.HideConsoleWindow(cmd)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("butler verification failed: %w\nOutput: %s", err, string(output))

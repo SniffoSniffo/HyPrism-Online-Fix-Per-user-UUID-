@@ -1,6 +1,7 @@
 package pwr
 
 import (
+	"HyPrism/internal/util"
 	"context"
 	"fmt"
 	"os"
@@ -115,6 +116,7 @@ func ApplyPWR(ctx context.Context, pwrFile string, progressCallback func(stage s
 	} else {
 		cmd = exec.CommandContext(ctx, butlerPath, "apply", "--staging-dir", stagingDir, pwrFile, gameDir)
 	}
+	util.HideConsoleWindow(cmd)
 	
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -199,6 +201,7 @@ func ApplyPWRToDir(ctx context.Context, pwrFile string, targetDir string, progre
 	} else {
 		cmd = exec.CommandContext(ctx, butlerPath, "apply", "--staging-dir", stagingDir, pwrFile, targetDir)
 	}
+	util.HideConsoleWindow(cmd)
 	
 	output, err := cmd.CombinedOutput()
 	if err != nil {
