@@ -247,16 +247,95 @@ jobs:
           echo "Checking for missing dependencies..."
           ldd HyPrism.AppDir/usr/bin/HyPrism 2>/dev/null | grep "not found" || echo "No missing deps for binary"
           
-          # Create AppRun with comprehensive library loading
+          # Create AppRun with auto-download of missing libraries
           cat > HyPrism.AppDir/AppRun << 'APPRUN'
           #!/bin/bash
-          # AppRun script for HyPrism with full library bundling
+          # AppRun script for HyPrism with automatic library download
           
           SELF=$(readlink -f "$0")
           HERE=${SELF%/*}
           
-          # Add bundled libraries to path FIRST (before system libs)
-          export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
+          # Local library cache directory
+          LIBCACHE="${HOME}/.local/lib/hyprism"
+          mkdir -p "$LIBCACHE"
+          
+          # Library download URL (HyPrism releases - we bundle webkit libs there)
+          LIB_URL="https://github.com/yyyumeniku/HyPrism/releases/latest/download"
+          
+          # Function to check if a library exists anywhere
+          check_lib() {
+            ldconfig -p 2>/dev/null | grep -q "$1" || \
+            [ -f "${HERE}/usr/lib/$1" ] || \
+            [ -f "${LIBCACHE}/$1" ] || \
+            [ -f "/usr/lib/$1" ] || \
+            [ -f "/usr/lib/x86_64-linux-gnu/$1" ]
+          }
+          
+          # Function to download libraries if missing
+          download_webkit_libs() {
+            echo "HyPrism: Checking for WebKit2GTK libraries..."
+            
+            # Check if we need to download
+            if ! check_lib "libwebkit2gtk-4.0.so.37"; then
+              echo "HyPrism: WebKit2GTK 4.0 not found. Downloading libraries..."
+              echo "This is a one-time setup that may take a minute."
+              echo ""
+              
+              # Try to download from multiple sources
+              DOWNLOAD_SUCCESS=false
+              
+              # Source 1: Pre-built library bundle from HyPrism releases
+              BUNDLE_URL="https://github.com/yyyumeniku/HyPrism/releases/latest/download/webkit2gtk-libs-x86_64.tar.gz"
+              
+              if command -v curl &> /dev/null; then
+                if curl -fsSL "$BUNDLE_URL" -o "/tmp/webkit-libs.tar.gz" 2>/dev/null; then
+                  tar -xzf "/tmp/webkit-libs.tar.gz" -C "$LIBCACHE" 2>/dev/null && DOWNLOAD_SUCCESS=true
+                  rm -f "/tmp/webkit-libs.tar.gz"
+                fi
+              elif command -v wget &> /dev/null; then
+                if wget -q "$BUNDLE_URL" -O "/tmp/webkit-libs.tar.gz" 2>/dev/null; then
+                  tar -xzf "/tmp/webkit-libs.tar.gz" -C "$LIBCACHE" 2>/dev/null && DOWNLOAD_SUCCESS=true
+                  rm -f "/tmp/webkit-libs.tar.gz"
+                fi
+              fi
+              
+              if [ "$DOWNLOAD_SUCCESS" = true ]; then
+                echo "HyPrism: Libraries downloaded successfully!"
+              else
+                echo ""
+                echo "╔══════════════════════════════════════════════════════════════╗"
+                echo "║  HyPrism requires WebKit2GTK 4.0 which is not installed.     ║"
+                echo "╠══════════════════════════════════════════════════════════════╣"
+                echo "║  Please install it manually:                                  ║"
+                echo "║                                                               ║"
+                echo "║  Arch Linux:  yay -S webkit2gtk-4.0                          ║"
+                echo "║  Ubuntu:      sudo apt install libwebkit2gtk-4.0-37          ║"
+                echo "║  Fedora:      sudo dnf install webkit2gtk4.0                 ║"
+                echo "║                                                               ║"
+                echo "║  Or use the Flatpak version which bundles all dependencies.  ║"
+                echo "╚══════════════════════════════════════════════════════════════╝"
+                echo ""
+                
+                # Show a GUI dialog if zenity is available
+                if command -v zenity &> /dev/null; then
+                  zenity --error --title="HyPrism - Missing Dependencies" \
+                    --text="WebKit2GTK 4.0 is required but not installed.\n\nPlease install it:\n• Arch: yay -S webkit2gtk-4.0\n• Ubuntu: sudo apt install libwebkit2gtk-4.0-37\n\nOr use the Flatpak version." \
+                    --width=400 2>/dev/null
+                elif command -v kdialog &> /dev/null; then
+                  kdialog --error "WebKit2GTK 4.0 is required but not installed.\n\nPlease install it:\n• Arch: yay -S webkit2gtk-4.0\n• Ubuntu: sudo apt install libwebkit2gtk-4.0-37\n\nOr use the Flatpak version." \
+                    --title "HyPrism - Missing Dependencies" 2>/dev/null
+                fi
+                
+                exit 1
+              fi
+            fi
+          }
+          
+          # Check and download libraries if needed
+          download_webkit_libs
+          
+          # Add library paths (bundled + cached + system)
+          export LD_LIBRARY_PATH="${HERE}/usr/lib:${LIBCACHE}:${LD_LIBRARY_PATH}"
           
           # Add our bundled binaries to path
           export PATH="${HERE}/usr/bin:${PATH}"
@@ -278,6 +357,12 @@ jobs:
           echo "Bundled libraries:"
           ls -la HyPrism.AppDir/usr/lib/ || true
           
+          # Create a standalone webkit libs bundle for download
+          echo "Creating webkit library bundle for auto-download..."
+          cd HyPrism.AppDir/usr/lib
+          tar -czvf ../../../webkit2gtk-libs-x86_64.tar.gz *.so* 2>/dev/null || echo "No libs to bundle"
+          cd ../../..
+          
           # Build AppImage with ARCH set and extract-and-run for compatibility
           ARCH=x86_64 ./appimagetool --appimage-extract-and-run HyPrism.AppDir HyPrism-x86_64.AppImage
           
@@ -287,6 +372,9 @@ jobs:
           # Replace binary with AppImage
           rm -rf build/bin/*
           mv HyPrism-x86_64.AppImage build/bin/
+          
+          # Move webkit libs bundle to build/bin for release
+          mv webkit2gtk-libs-x86_64.tar.gz build/bin/ 2>/dev/null || true
           
           # Also create a tar.gz for systems where AppImage doesn't work
           cd HyPrism.AppDir/usr/bin
