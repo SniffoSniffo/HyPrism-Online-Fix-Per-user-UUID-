@@ -222,6 +222,9 @@ const App: React.FC = () => {
         setIsGameRunning(true);
         setIsDownloading(false);
         setProgress(0);
+        
+        // Game is now installed, update state
+        setIsVersionInstalled(true);
       }
     });
 
