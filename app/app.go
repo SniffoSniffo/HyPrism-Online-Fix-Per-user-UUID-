@@ -321,7 +321,7 @@ func openFolder(path string) error {
 	return cmd.Start()
 }
 
-// OpenGameFolder opens the game folder for release-latest instance
+// OpenGameFolder opens the game folder for latest instance
 func (a *App) OpenGameFolder() error {
 	gameDir := env.GetInstanceDir("release", 0)
 	if err := os.MkdirAll(gameDir, 0755); err != nil {
@@ -330,12 +330,12 @@ func (a *App) OpenGameFolder() error {
 	return openFolder(gameDir)
 }
 
-// GetGamePath returns the game installation path for release-latest instance
+// GetGamePath returns the game installation path for latest instance
 func (a *App) GetGamePath() string {
 	return env.GetInstanceDir("release", 0)
 }
 
-// IsGameInstalled checks if the game is installed (release-latest instance)
+// IsGameInstalled checks if the game is installed (latest instance)
 func (a *App) IsGameInstalled() bool {
 	return env.IsVersionInstalled("release", 0)
 }

@@ -167,6 +167,8 @@ export namespace config {
 	    musicEnabled: boolean;
 	    versionType: string;
 	    selectedVersion: number;
+	    customInstanceDir: string;
+	    autoUpdateLatest: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -179,6 +181,8 @@ export namespace config {
 	        this.musicEnabled = source["musicEnabled"];
 	        this.versionType = source["versionType"];
 	        this.selectedVersion = source["selectedVersion"];
+	        this.customInstanceDir = source["customInstanceDir"];
+	        this.autoUpdateLatest = source["autoUpdateLatest"];
 	    }
 	}
 

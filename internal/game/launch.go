@@ -219,7 +219,7 @@ func GetGameLogs() (string, error) {
 		filepath.Join(baseDir, "UserData", "logs", "latest.log"),
 		filepath.Join(baseDir, "UserData", "logs", "game.log"),
 		filepath.Join(baseDir, "UserData", "logs", "client.log"),
-		// Instance logs (release-latest)
+		// Instance logs (latest)
 		filepath.Join(env.GetInstanceGameDir("release", 0), "logs", "latest.log"),
 		filepath.Join(env.GetInstanceGameDir("release", 0), "logs", "game.log"),
 		filepath.Join(env.GetInstanceGameDir("release", 0), "Client", "logs", "latest.log"),

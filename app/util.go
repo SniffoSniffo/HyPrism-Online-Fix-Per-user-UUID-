@@ -38,7 +38,7 @@ func (a *App) OpenFolder() error {
 	return nil
 }
 
-// RepairInstallation cleans up corrupted/incomplete installation files
+// RepairInstallation cleans up corrupted/incomplete installation files for latest instance
 // This is useful when butler fails with "Access Denied" errors
 func (a *App) RepairInstallation() error {
 	gameDir := env.GetInstanceGameDir("release", 0)

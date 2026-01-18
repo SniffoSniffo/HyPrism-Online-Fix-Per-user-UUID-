@@ -34,6 +34,10 @@ export function ExitGame() {
   return window['go']['app']['App']['ExitGame']();
 }
 
+export function GetAutoUpdateLatest() {
+  return window['go']['app']['App']['GetAutoUpdateLatest']();
+}
+
 export function GetAvailableVersions() {
   return window['go']['app']['App']['GetAvailableVersions']();
 }
@@ -48,6 +52,10 @@ export function GetCrashReports() {
 
 export function GetCurrentVersion() {
   return window['go']['app']['App']['GetCurrentVersion']();
+}
+
+export function GetCustomInstanceDir() {
+  return window['go']['app']['App']['GetCustomInstanceDir']();
 }
 
 export function GetGameLogs() {
@@ -192,6 +200,14 @@ export function SaveDiagnosticReport() {
 
 export function SearchMods(arg1, arg2, arg3) {
   return window['go']['app']['App']['SearchMods'](arg1, arg2, arg3);
+}
+
+export function SetAutoUpdateLatest(arg1) {
+  return window['go']['app']['App']['SetAutoUpdateLatest'](arg1);
+}
+
+export function SetCustomInstanceDir(arg1) {
+  return window['go']['app']['App']['SetCustomInstanceDir'](arg1);
 }
 
 export function SetMusicEnabled(arg1) {

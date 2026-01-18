@@ -22,6 +22,8 @@ export function DownloadVersion(arg1:string,arg2:string):Promise<void>;
 
 export function ExitGame():Promise<void>;
 
+export function GetAutoUpdateLatest():Promise<boolean>;
+
 export function GetAvailableVersions():Promise<Record<string, number>>;
 
 export function GetConfig():Promise<config.Config>;
@@ -29,6 +31,8 @@ export function GetConfig():Promise<config.Config>;
 export function GetCrashReports():Promise<Array<app.CrashReport>>;
 
 export function GetCurrentVersion():Promise<string>;
+
+export function GetCustomInstanceDir():Promise<string>;
 
 export function GetGameLogs():Promise<string>;
 
@@ -101,6 +105,10 @@ export function SaveConfig():Promise<void>;
 export function SaveDiagnosticReport():Promise<string>;
 
 export function SearchMods(arg1:string,arg2:number,arg3:number):Promise<mods.SearchResult>;
+
+export function SetAutoUpdateLatest(arg1:boolean):Promise<void>;
+
+export function SetCustomInstanceDir(arg1:string):Promise<void>;
 
 export function SetMusicEnabled(arg1:boolean):Promise<void>;
 

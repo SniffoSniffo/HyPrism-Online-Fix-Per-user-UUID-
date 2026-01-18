@@ -110,7 +110,7 @@ func checkConnectivity() ConnectivityInfo {
 func checkGameStatus() GameStatusInfo {
 	info := GameStatusInfo{}
 
-	// Check release-latest instance (version 0)
+	// Check latest instance (version 0)
 	gameDir := env.GetInstanceGameDir("release", 0)
 
 	// Check if game is installed
@@ -125,9 +125,9 @@ func checkGameStatus() GameStatusInfo {
 		info.ClientExists = true
 	}
 
-	// Check if any release instance is installed
+	// Check if latest instance is installed
 	if env.IsVersionInstalled("release", 0) {
-		info.Version = "release-latest"
+		info.Version = "latest"
 	}
 
 	// Check if online fix is applied (Windows only)

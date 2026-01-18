@@ -102,12 +102,12 @@ func GetInstancesDir() string {
 }
 
 // GetInstanceDir returns the directory for a specific instance
-// Format: instances/{branch}-v{version} or instances/release-latest for auto-updating
+// Format: instances/{branch}-v{version} or instances/latest for auto-updating
 func GetInstanceDir(branch string, version int) string {
 	var instanceName string
 	if version == 0 {
 		// Version 0 means "latest" auto-updating instance
-		instanceName = fmt.Sprintf("%s-latest", branch)
+		instanceName = "latest"
 	} else {
 		instanceName = fmt.Sprintf("%s-v%d", branch, version)
 	}
