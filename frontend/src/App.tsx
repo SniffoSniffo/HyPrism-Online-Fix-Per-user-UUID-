@@ -30,6 +30,7 @@ import {
   // Settings
   SelectInstanceDirectory,
   GetNews,
+  GetLauncherVersion,
 } from '../wailsjs/go/app/App';
 import { EventsOn } from '../wailsjs/runtime/runtime';
 import { NewsPreview } from './components/NewsPreview';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
   // User state
   const [username, setUsername] = useState<string>("HyPrism");
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [launcherVersion, setLauncherVersion] = useState<string>("dev");
 
   // Download state
   const [progress, setProgress] = useState<number>(0);
@@ -183,6 +185,7 @@ const App: React.FC = () => {
   useEffect(() => {
     // Initialize user settings
     GetNick().then((n: string) => n && setUsername(n));
+    GetLauncherVersion().then((v: string) => setLauncherVersion(v));
     // GetCustomInstanceDir().then((dir: string) => setCustomInstanceDir(dir));
 
     // Load saved branch and version - must load branch first, then version
@@ -387,6 +390,7 @@ const App: React.FC = () => {
             onUserChange={handleNickChange}
             updateAvailable={!!updateAsset}
             onUpdate={handleUpdate}
+            launcherVersion={launcherVersion}
           />
           {/* Hytale Logo & News - Right Side */}
           <div className="flex flex-col items-end gap-3">

@@ -2,6 +2,9 @@ name: Build and Release
 
 on:
   push:
+    branches:
+      - nightly
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -52,10 +55,19 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          VERSION="${GITHUB_REF#refs/tags/v}"
-          if [ -z "$VERSION" ] || [ "$VERSION" = "$GITHUB_REF" ]; then
+          # Extract version from tag or use branch name
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          elif [[ "${GITHUB_REF}" == refs/heads/nightly ]]; then
+            # For nightly builds, use commit short SHA
+            VERSION="nightly-$(git rev-parse --short HEAD)"
+          elif [[ "${GITHUB_REF}" == refs/heads/main ]]; then
+            VERSION="dev-main"
+          else
             VERSION="dev"
           fi
+          
+          echo "Building version: $VERSION"
           wails build -clean -tags webkit2_41 -ldflags "-X 'HyPrism/app.AppVersion=$VERSION'"
       
       - name: Create DMG (macOS)
@@ -569,11 +581,13 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/nightly'
     permissions:
       contents: write
     
     steps:
+      - uses: actions/checkout@v4
+      
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -585,9 +599,29 @@ jobs:
           # Remove empty subdirectories
           find artifacts -type d -empty -delete
       
+      - name: Determine version and release type
+        id: version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            IS_PRERELEASE="false"
+            RELEASE_NAME="v$VERSION"
+          elif [[ "${GITHUB_REF}" == refs/heads/nightly ]]; then
+            VERSION="nightly-$(git rev-parse --short HEAD)"
+            IS_PRERELEASE="true"
+            RELEASE_NAME="Nightly Build $(date +'%Y-%m-%d')"
+          else
+            VERSION="dev"
+            IS_PRERELEASE="true"
+            RELEASE_NAME="Development Build"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+      
       - name: Create version.json for auto-updater
         run: |
-          VERSION="${GITHUB_REF#refs/tags/v}"
+          VERSION="${{ steps.version.outputs.version }}"
           cat > artifacts/version.json << EOF
           {
             "version": "$VERSION",
@@ -636,3 +670,18 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: artifacts/*
+          name: ${{ steps.version.outputs.release_name }}
+          tag_name: v${{ steps.version.outputs.version }}
+          prerelease: ${{ steps.version.outputs.is_prerelease }}
+          body: |
+            ## HyPrism ${{ steps.version.outputs.release_name }}
+            
+            ${{ steps.version.outputs.is_prerelease == 'true' && '⚠️ This is a pre-release nightly build for testing.' || '🎉 Stable release' }}
+            
+            ### Installation
+            - **Windows**: Download `HyPrism.exe`
+            - **macOS**: Download `HyPrism-macOS-arm64.dmg`
+            - **Linux**: Download `HyPrism.flatpak` (recommended) or `HyPrism-x86_64.AppImage`
+            
+            ### Changes
+            See commit history for details.

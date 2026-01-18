@@ -9,6 +9,7 @@ interface ProfileSectionProps {
   onUserChange: (name: string) => void;
   updateAvailable: boolean;
   onUpdate: () => void;
+  launcherVersion: string;
 }
 
 export const ProfileSection: React.FC<ProfileSectionProps> = ({
@@ -17,7 +18,8 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
   onEditToggle,
   onUserChange,
   updateAvailable,
-  onUpdate
+  onUpdate,
+  launcherVersion
 }) => {
   const [editValue, setEditValue] = React.useState(username);
 
@@ -96,6 +98,11 @@ export const ProfileSection: React.FC<ProfileSectionProps> = ({
           Update Available
         </motion.button>
       )}
+      
+      {/* Launcher version */}
+      <div className="text-xs text-white/30 mt-1">
+        HyPrism {launcherVersion}
+      </div>
     </motion.div>
   );
 };
