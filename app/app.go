@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 
 	"HyPrism/internal/config"
 	"HyPrism/internal/env"
@@ -395,6 +396,41 @@ func (a *App) IsVersionInstalled(branch string, version int) bool {
 // GetInstalledVersionsForBranch returns all installed version numbers for a specific branch
 func (a *App) GetInstalledVersionsForBranch(branch string) []int {
 	return env.GetInstalledVersions(branch)
+}
+
+// CheckLatestNeedsUpdate checks if the 'latest' instance needs updating
+// Returns true if latest is installed but not at current latest version
+func (a *App) CheckLatestNeedsUpdate(branch string) bool {
+	// Check if latest instance is installed
+	if !env.IsVersionInstalled(branch, 0) {
+		return false
+	}
+	
+	// Get the actual latest version number
+	latestVersion := pwr.FindLatestVersion(branch)
+	if latestVersion <= 0 {
+		return false
+	}
+	
+	// Check if the latest instance has the current version
+	// We can check this by looking at the instance's installed version file
+	instanceDir := env.GetInstanceDir(branch, 0)
+	versionFile := filepath.Join(instanceDir, "version.txt")
+	data, err := os.ReadFile(versionFile)
+	if err != nil {
+		// No version file means fresh install or corrupted
+		return true
+	}
+	
+	installedVersionStr := string(data)
+	installedVersionStr = filepath.Base(strings.TrimSpace(installedVersionStr))
+	installedVersion, err := strconv.Atoi(installedVersionStr)
+	if err != nil {
+		return true
+	}
+	
+	// If installed version is less than latest, needs update
+	return installedVersion < latestVersion
 }
 
 // GetCurrentVersion returns the currently installed game version with formatted date

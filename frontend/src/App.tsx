@@ -28,7 +28,8 @@ import {
   IsVersionInstalled,
   GetInstalledVersionsForBranch,
   GetCustomInstanceDir,
-  SetCustomInstanceDir
+  SetCustomInstanceDir,
+  CheckLatestNeedsUpdate
 } from '../wailsjs/go/app/App';
 import { EventsOn } from '../wailsjs/runtime/runtime';
 
@@ -63,21 +64,32 @@ const App: React.FC = () => {
   const [isVersionInstalled, setIsVersionInstalled] = useState<boolean>(false);
   const [isCheckingInstalled, setIsCheckingInstalled] = useState<boolean>(false);
   const [customInstanceDir, setCustomInstanceDir] = useState<string>("");
+  const [latestNeedsUpdate, setLatestNeedsUpdate] = useState<boolean>(false);
 
   // Check if current version is installed when branch or version changes
   useEffect(() => {
     const checkInstalled = async () => {
       if (currentVersion <= 0) {
         setIsVersionInstalled(false);
+        // Check if latest needs update
+        try {
+          const needsUpdate = await CheckLatestNeedsUpdate(currentBranch);
+          setLatestNeedsUpdate(needsUpdate);
+        } catch (e) {
+          console.error('Failed to check if latest needs update:', e);
+          setLatestNeedsUpdate(false);
+        }
         return;
       }
       setIsCheckingInstalled(true);
       try {
         const installed = await IsVersionInstalled(currentBranch, currentVersion);
         setIsVersionInstalled(installed);
+        setLatestNeedsUpdate(false); // Versioned instances don't auto-update
       } catch (e) {
         console.error('Failed to check if version installed:', e);
         setIsVersionInstalled(false);
+        setLatestNeedsUpdate(false);
       }
       setIsCheckingInstalled(false);
     };

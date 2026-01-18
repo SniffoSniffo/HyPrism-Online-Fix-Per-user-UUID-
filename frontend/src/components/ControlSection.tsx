@@ -9,6 +9,7 @@ interface ControlSectionProps {
   isDownloading: boolean;
   isGameRunning: boolean;
   isVersionInstalled: boolean;
+  latestNeedsUpdate?: boolean;
   progress: number;
   downloaded: number;
   total: number;
@@ -59,6 +60,7 @@ export const ControlSection: React.FC<ControlSectionProps> = ({
   isDownloading,
   isGameRunning,
   isVersionInstalled,
+  latestNeedsUpdate = false,
   progress,
   downloaded,
   total,
@@ -299,6 +301,14 @@ export const ControlSection: React.FC<ControlSectionProps> = ({
             >
               <Loader2 size={20} className="animate-spin" />
               <span>CHECKING...</span>
+            </button>
+          ) : latestNeedsUpdate && currentVersion === 0 ? (
+            <button
+              onClick={onDownload}
+              className="h-12 px-8 rounded-xl font-black text-xl tracking-tight flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 cursor-pointer"
+            >
+              <Download size={20} />
+              <span>UPDATE</span>
             </button>
           ) : isVersionInstalled ? (
             <button

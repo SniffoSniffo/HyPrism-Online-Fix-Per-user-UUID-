@@ -243,6 +243,16 @@ func GetInstalledVersions(branch string) []int {
 	}
 	
 	var versions []int
+	
+	// Check for 'latest' directory (version 0)
+	for _, entry := range entries {
+		if entry.IsDir() && entry.Name() == "latest" {
+			versions = append(versions, 0)
+			break
+		}
+	}
+	
+	// Check for versioned instances (release-v4, pre-release-v8, etc.)
 	for _, entry := range entries {
 		if entry.IsDir() && len(entry.Name()) > len(prefix) && entry.Name()[:len(prefix)] == prefix {
 			versionStr := entry.Name()[len(prefix):]
