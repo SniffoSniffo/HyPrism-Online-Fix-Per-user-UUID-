@@ -77,23 +77,25 @@ export const NewsPreview: React.FC<NewsPreviewProps> = ({ getNews }) => {
                     (<div className='flex flex-col gap-y-3 glass p-4 rounded-xl'>
                         {news.map((item, index) => {
                             return (
-                                <div key={index} className='flex gap-3 group'>
+                                <button
+                                    key={index}
+                                    onClick={() => openLink(item.url)}
+                                    disabled={loading}
+                                    className='flex gap-3 group hover:bg-white/5 p-2 rounded-lg transition-all cursor-pointer text-left w-full'
+                                >
                                     {/* News Image */}
                                     {item.imageUrl && (
                                         <img 
                                             src={item.imageUrl} 
                                             alt={item.title}
-                                            className='w-24 h-16 object-cover rounded-lg flex-shrink-0'
+                                            className='w-24 h-16 object-cover rounded-lg flex-shrink-0 group-hover:scale-105 transition-transform'
                                         />
                                     )}
                                     {/* News Content */}
                                     <div className='flex flex-col justify-center min-w-0'>
-                                        <button 
-                                            onClick={() => openLink(item.url)} 
-                                            disabled={loading} 
-                                            className='text-[#FFA845] hover:underline cursor-pointer text-left text-sm font-medium line-clamp-2 mb-1'>
+                                        <p className='text-[#FFA845] group-hover:underline text-sm font-medium line-clamp-2 mb-1'>
                                             {item.title}
-                                        </button>
+                                        </p>
                                         <div className='flex flex-col text-xs'>
                                             <div className='flex gap-x-1 items-center text-white/60'>
                                                 <User size='12' />
@@ -105,7 +107,7 @@ export const NewsPreview: React.FC<NewsPreviewProps> = ({ getNews }) => {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </button>
                             )
                         })}
                         <button 
