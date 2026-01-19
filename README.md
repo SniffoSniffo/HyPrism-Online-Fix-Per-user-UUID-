@@ -14,7 +14,7 @@ A multiplatform Hytale launcher with mod manager and more!
 
 ## Security Notice
 
-**Antivirus false positives are expected for unsigned binaries.** HyPrism is open source and safe. See [SECURITY.md](SECURITY.md) for detailed explanation of why scanners flag it and what HyPrism actually does.
+**Antivirus false positives are expected for unsigned binaries.** HyPrism is open source and safe.
 
 ## Installation
 Downloads are available in releases
