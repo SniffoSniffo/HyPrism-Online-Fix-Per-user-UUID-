@@ -244,7 +244,11 @@ func InstallGameToInstance(ctx context.Context, versionType string, version int,
 	if err := pwr.ApplyPWRToDir(ctx, pwrPath, instanceGameDir, progressCallback); err != nil {
 		return fmt.Errorf("failed to apply game patch: %w", err)
 	}
-
+	// Auto-replace HytaleClient with custom bundled version
+	if err := ReplaceHytaleClient(instanceGameDir); err != nil {
+		fmt.Printf("⚠️ Warning: failed to replace HytaleClient: %v\n", err)
+		// Don't fail the whole install — let base game run
+	}
 	// Verify installation
 	var clientPath string
 	switch runtime.GOOS {

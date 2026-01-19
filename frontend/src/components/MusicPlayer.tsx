@@ -75,20 +75,20 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '', forceM
       const volumeStep = startVolume / steps;
       let currentStep = 0;
 
-      fadeIntervalRef.current = setInterval(() => {
-        currentStep++;
-        if (audioRef.current) {
-          audioRef.current.volume = Math.max(0, startVolume - (volumeStep * currentStep));
-        }
-        if (currentStep >= steps) {
-          if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-          if (audioRef.current) {
-            audioRef.current.pause(); // Pause instead of just muting
-            audioRef.current.currentTime = 0; // Reset to beginning
-          }
-          setIsFading(false);
-        }
-      }, stepTime);
+		fadeIntervalRef.current = window.setInterval(() => {
+		  currentStep++;
+		  if (audioRef.current) {
+			audioRef.current.volume = Math.max(0, startVolume - (volumeStep * currentStep));
+		  }
+		  if (currentStep >= steps) {
+			if (fadeIntervalRef.current) window.clearInterval(fadeIntervalRef.current);
+			if (audioRef.current) {
+			  audioRef.current.pause();
+			  audioRef.current.currentTime = 0;
+			}
+			setIsFading(false);
+		  }
+		}, stepTime);
     } else if (!forceMuted && audioRef.current.paused) {
       // Fade in and resume playing over 1 second
       setIsFading(true);
@@ -107,16 +107,16 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ className = '', forceM
       const volumeStep = targetVolume / steps;
       let currentStep = 0;
 
-      fadeIntervalRef.current = setInterval(() => {
-        currentStep++;
-        if (audioRef.current) {
-          audioRef.current.volume = Math.min(targetVolume, volumeStep * currentStep);
-        }
-        if (currentStep >= steps) {
-          if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-          setIsFading(false);
-        }
-      }, stepTime);
+		fadeIntervalRef.current = window.setInterval(() => {
+		  currentStep++;
+		  if (audioRef.current) {
+			audioRef.current.volume = Math.min(targetVolume, volumeStep * currentStep);
+		  }
+		  if (currentStep >= steps) {
+			if (fadeIntervalRef.current) window.clearInterval(fadeIntervalRef.current);
+			setIsFading(false);
+		  }
+		}, stepTime);
     }
 
     return () => {

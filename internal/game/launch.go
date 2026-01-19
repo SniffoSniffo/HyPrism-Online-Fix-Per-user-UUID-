@@ -82,7 +82,7 @@ func LaunchInstance(playerName string, branch string, version int) error {
 			"--user-dir", userDataDir,
 			"--java-exec", jrePath,
 			"--auth-mode", "offline",
-			"--uuid", "00000000-1337-1337-1337-000000000000",
+			"--uuid", OfflineUUID(playerName).String(),
 			"--name", playerName,
 		)
 	} else if runtime.GOOS == "windows" {
@@ -92,7 +92,7 @@ func LaunchInstance(playerName string, branch string, version int) error {
 			"--user-dir", userDataDir,
 			"--java-exec", jrePath,
 			"--auth-mode", "offline",
-			"--uuid", "00000000-1337-1337-1337-000000000000",
+			"--uuid", OfflineUUID(playerName).String(),
 			"--name", playerName,
 		)
 		cmd.SysProcAttr = getWindowsSysProcAttr()
@@ -104,7 +104,7 @@ func LaunchInstance(playerName string, branch string, version int) error {
 			"--user-dir", userDataDir,
 			"--java-exec", jrePath,
 			"--auth-mode", "offline",
-			"--uuid", "00000000-1337-1337-1337-000000000000",
+			"--uuid", OfflineUUID(playerName).String(),
 			"--name", playerName,
 		)
 		// Preserve LD_LIBRARY_PATH with Client directory first
