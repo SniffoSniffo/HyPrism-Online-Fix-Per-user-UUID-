@@ -1,6 +1,8 @@
-# HyPrism
+<p align="center">
+  <img src="assets/Hyprism.svg" alt="HyPrism Logo" width="64" height="64" />
+</p>
 
-<img src="assets/Hyprism.svg" alt="HyPrism Logo" width="10" height="10" />
+# HyPrism
 
 [![Downloads](https://img.shields.io/github/downloads/yyyumeniku/HyPrism/total?style=for-the-badge&logo=github&label=Downloads&color=207e5c)](https://github.com/yyyumeniku/HyPrism/releases)
 [![Website](https://img.shields.io/badge/Website-hyprism-207e5c?style=for-the-badge&logo=firefox)](https://yyyumeniku.github.io/hyprism-site/)
