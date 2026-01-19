@@ -157,6 +157,7 @@ export const ModManager: React.FC<ModManagerProps> = ({
   const [isLoadingModFiles, setIsLoadingModFilesState] = useState(false);
   const [detailSelectedFileId, setDetailSelectedFileId] = useState<number | undefined>();
   const [activeScreenshot, setActiveScreenshot] = useState(0);
+  const [fullscreenImage, setFullscreenImage] = useState<{ url: string; title: string } | null>(null);
 
   // Actions
   const [isDownloading, setIsDownloading] = useState(false);
@@ -1092,9 +1093,12 @@ export const ModManager: React.FC<ModManagerProps> = ({
                       <h4 className="text-white/50 text-xs uppercase mb-2">Screenshots</h4>
                       <div className="relative">
                         <button 
-                          onClick={() => BrowserOpenURL(screenshots[activeScreenshot]?.url)}
+                          onClick={() => setFullscreenImage({ 
+                            url: screenshots[activeScreenshot]?.url, 
+                            title: screenshots[activeScreenshot]?.title || '' 
+                          })}
                           className="w-full h-40 rounded-xl overflow-hidden bg-black/30 cursor-pointer hover:ring-2 hover:ring-[#FFA845]/50 transition-all"
-                          title="Click to open full image"
+                          title="Click to view full image"
                         >
                           <img
                             src={screenshots[activeScreenshot]?.url}
@@ -1490,6 +1494,33 @@ export const ModManager: React.FC<ModManagerProps> = ({
               {downloadProgress.currentMod}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Fullscreen Image Viewer */}
+      {fullscreenImage && (
+        <div 
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[60]"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-4 right-4 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+          >
+            <X size={24} />
+          </button>
+          {fullscreenImage.title && (
+            <div className="absolute top-4 left-4 px-4 py-2 bg-black/60 rounded-xl">
+              <p className="text-white font-medium">{fullscreenImage.title}</p>
+            </div>
+          )}
+          <img
+            src={fullscreenImage.url}
+            alt={fullscreenImage.title}
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <p className="absolute bottom-4 text-white/50 text-sm">Click anywhere to close</p>
         </div>
       )}
     </div>
