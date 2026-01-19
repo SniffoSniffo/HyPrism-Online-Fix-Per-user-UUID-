@@ -53,6 +53,8 @@ func main() {
 		Linux: &linux.Options{
 			WindowIsTranslucent: false,
 			WebviewGpuPolicy:    linux.WebviewGpuPolicyNever,
+			// Hide window decorations on Linux to prevent double titlebar on KDE/Wayland
+			// ProgrammaticWindowDecoration: true,
 		},
 	})
 
